@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
 import Home from './app/screens/Home';
 import Login from './app/screens/Login';
+import Especificacion from './app/screens/Especificacion';
 
 const Stack = createStackNavigator();
 
@@ -20,6 +21,7 @@ function App(): React.JSX.Element {
           }}
         />
         <Stack.Screen name="Home" component={Home}/>
+        <Stack.Screen name="Especificacion" component={Especificacion}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

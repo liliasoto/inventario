@@ -7,6 +7,13 @@ import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
 
 type RootStackParamList = {
     Home: undefined
+    Especificacion: { 
+        nombre: string;
+        precio: number;
+        minStock: number;
+        currentStock: number;
+        maxStock: number;
+      };
 };
 type HomeScreenProps = StackNavigationProp<RootStackParamList, 'Home'>;
 type HomeScreenRoute = RouteProp<RootStackParamList, 'Home'>;
@@ -20,7 +27,13 @@ type HomeProps = {
 function Home({navigation}: HomeProps): React.JSX.Element {
     const [products, setProducts] = useState<Product[]>([]);
     const productItem = ({item}: {item:Product}) => (
-        <TouchableOpacity style={styles.productItem}>
+        <TouchableOpacity 
+            style={styles.productItem}
+            onPress={() =>
+                navigation.navigate('Especificacion', {
+                  ...item,
+                })
+            }>
             <View style={{flexDirection: 'row'}}>
                 <View style={{flexDirection: 'column', flexGrow: 9}}>
                     <Text style={styles.itemTitle}>{item.nombre}</Text>
