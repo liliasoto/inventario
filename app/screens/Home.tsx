@@ -1,21 +1,13 @@
-import { RouteProp } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import React, { useEffect, useState } from 'react';
-import { Button, SafeAreaView, StyleSheet, Text, View } from "react-native"
-import { Product } from './model/Product';
-import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
+import { RouteProp } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { useEffect, useState } from "react";
+import { SafeAreaView, Text , StyleSheet, View} from "react-native";
+import { Product } from "./model/Product";
+import { TouchableOpacity,FlatList } from "react-native-gesture-handler";
+import { RootStackParamList } from "../../App";
+import LocalDB from "../persistance/localdb";
 
-type RootStackParamList = {
-    Home: undefined
-    Especificacion: { 
-        nombre: string;
-        precio: number;
-        minStock: number;
-        currentStock: number;
-        maxStock: number;
-      };
-};
-type HomeScreenProps = StackNavigationProp<RootStackParamList, 'Home'>;
+type HomeScreenProps = StackNavigationProp<RootStackParamList,'Home'>;
 type HomeScreenRoute = RouteProp<RootStackParamList, 'Home'>;
 
 type HomeProps = {
@@ -23,94 +15,82 @@ type HomeProps = {
     route: HomeScreenRoute;
 };
 
+function Home({navigation}:HomeProps): React.JSX.Element{
+    const[products, setProducts] = useState<Product[]>(
+        []);
+    const productItem = ({item} : {item:Product}) => (
+        <TouchableOpacity style={style.productItem} onPress={() => navigation.push("ProductDetails", { product: item })}>
 
-function Home({navigation}: HomeProps): React.JSX.Element {
-    const [products, setProducts] = useState<Product[]>([]);
-    const productItem = ({item}: {item:Product}) => (
-        <TouchableOpacity 
-            style={styles.productItem}
-            onPress={() =>
-                navigation.navigate('Especificacion', {
-                  ...item,
-                })
-            }>
-            <View style={{flexDirection: 'row'}}>
-                <View style={{flexDirection: 'column', flexGrow: 9}}>
-                    <Text style={styles.itemTitle}>{item.nombre}</Text>
-                    <Text style={styles.itemDetails}>Precio: ${item.precio.toFixed(2)}</Text>
+            <View style={{flexDirection:'row', justifyContent: 'space-between'}}>
+
+                <View style={{flexDirection:'column', flexGrow:9}}>
+
+                    <Text style={style.itemTitle}>{item.nombre}</Text>
+                    <Text style={style.itemDetails}> precio: $ {item.precio.toFixed(2)}</Text>
+
                 </View>
+
                 <Text 
-                    style={[
-                    styles.itemBadge,
-                    item.currentStock < item.minStock ? styles.itemBadgeError : null
+                style={[
+                    style.itemBadge, 
+                    item.currentStock < item.minStock ? style.itemBadgeError : null,
                     ]}>
                     {item.currentStock}
-                </Text>
+                    </Text>
+
             </View>
         </TouchableOpacity>
     );
-
-    useEffect(() => {
-        setProducts([
-            {
-                id: 1, 
-                nombre: 'Martillo', 
-                precio: 80,
-                minStock: 5,
-                currentStock: 2,
-                maxStock: 20,
-            },
-            {
-                id: 2, 
-                nombre: 'Manguera (metro)', 
-                precio: 15,
-                minStock: 50,
-                currentStock: 200,
-                maxStock: 1000,
-            }
-        ])
-    }, []);
     
-    return(
-        <SafeAreaView>
-            <FlatList 
-                data={products} 
-                renderItem={productItem} 
-                keyExtractor={item => item.id.toString()}
-            />
-        </SafeAreaView>
-    );
-};
+    useEffect(() => {
+        LocalDB.init();
+        navigation.addListener('focus',async ()=>{
+            const db = await LocalDB.connect();
+            db.transaction(async tx => {
+                tx.executeSql(
+                    'SELECT * FROM productos',
+                    [],
+                    (_,res) =>{
+                    let prods = [];
+                    for(let i = 0; i < res.rows.length; i++){
+                        prods.push(res.rows.item(i));
+                    }
+                    setProducts(prods);
+                },
+                error => console.error({error}),
+            );
+            });
+        })
+    }, [navigation]);
 
-const styles = StyleSheet.create({
-    productItem: {
-        padding: 12,
-        borderBottomColor: '#C0C0C0',
-        borderBottomWidth: 1,
-        backgroundColor: 'white',
-    },
-    itemTitle: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: 'black',
-        //textTransform: 'uppercase',
-    },
-    itemDetails: {
-        fontSize: 17,
-        opacity: 0.8
-    },
-    itemBadge: {
-        fontSize: 24,
-        color: 'blue',
-        fontWeight: 'bold',
-        alignSelf: 'center',
-    },
-    itemBadgeError: {
-        fontSize: 24,
-        color: 'red',
-        fontWeight: 'bold',
-        alignSelf: 'center'
-    }
+  return (
+    <SafeAreaView>
+      <FlatList data={products} renderItem={productItem} keyExtractor={(item) => item.id.toString()} />
+    </SafeAreaView>
+  );
+}
+
+const style = StyleSheet.create({
+    productItem:{
+        padding:12, 
+       },
+       
+        itemTitle:{
+            fontSize:20,
+        },
+        itemDetails:{
+            fontSize:14,
+            opacity:0.7,
+        },
+        itemBadge:{
+            fontSize:24,
+            color:'green',
+            alignSelf:'center'
+        },
+        itemBadgeError:{
+            fontSize:24,
+            color:'red'
+        }
 });
 
 export default Home;

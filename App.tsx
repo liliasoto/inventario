@@ -1,14 +1,28 @@
 
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, NavigationProp, useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
 import Home from './app/screens/Home';
 import Login from './app/screens/Login';
-import Especificacion from './app/screens/Especificacion';
+import ProductDetails, {Params as ProductDetailsParams} from './app/screens/ProductDetails';
+import ProductAdd from './app/screens/PoductAdd';
+import { Button } from 'react-native';
 
 const Stack = createStackNavigator();
 
+export type RootStackParamList = {
+  Home: undefined;
+  ProductDetails: ProductDetailsParams;
+  ProductAdd: undefined;
+}
+
+function HomeHeader(): React.JSX.Element {
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  return <Button title='Agregar' onPress={() => navigation.navigate('ProductAdd')}/>
+}
+
 function App(): React.JSX.Element {
+
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName='Login'>
@@ -20,8 +34,15 @@ function App(): React.JSX.Element {
             headerStyle: {backgroundColor:'#ffff00'},
           }}
         />
-        <Stack.Screen name="Home" component={Home}/>
-        <Stack.Screen name="Especificacion" component={Especificacion}/>
+        <Stack.Screen 
+          name="Home" 
+          component={Home} 
+          options={{
+            headerRight: HomeHeader,
+          }}
+        />
+        <Stack.Screen name="ProductDetails" component={ProductDetails}/>
+        <Stack.Screen name="ProductAdd" component={ProductAdd}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

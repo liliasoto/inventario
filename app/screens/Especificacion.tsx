@@ -1,7 +1,13 @@
 import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Product } from './model/Product';
+
+export type Params = {
+  product: Product;
+};
 
 // Definición de tipos para las rutas y la navegación
 type RootStackParamList = {
@@ -27,14 +33,54 @@ const Especificacion = ({ route }: Props) => {
   const { nombre, precio, minStock, currentStock, maxStock } = route.params;
 
   return (
-    <View>
-      <Text>Nombre: {nombre}</Text>
-      <Text>Precio: {precio}</Text>
-      <Text>Stock Mínimo: {minStock}</Text>
-      <Text>Stock Actual: {currentStock}</Text>
-      <Text>Stock Máximo: {maxStock}</Text>
-    </View>
+    <SafeAreaView>
+      <View>
+        <Text style={styles.header}>{nombre}</Text>
+        <View style={styles.row}>
+          <Text style={[styles.col, styles.text]}>Existencias: </Text>
+          <Text style={[styles.colAuto, styles.text]}>
+            <Text 
+              style={[currentStock < minStock ? styles.stockError : null]}>{currentStock}
+            </Text>{' '}/{maxStock}
+          </Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={[styles.col, styles.text]}>Precio: </Text>
+          <Text style={[styles.colAuto, styles.text]}>${precio.toFixed(2)}</Text>
+        </View>
+      </View>
+      <View style={styles.row}>
+
+      </View>
+    </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  text: {
+      fontSize: 20
+  },
+  page: {
+    borderBottomColor: '#FFFFFF',
+      backgroundColor: 'white',
+      fontSize: 20
+  },
+  header: {
+    fontSize: 48,
+  },
+  row: {
+    display: 'flex',
+    flexDirection: 'row',
+  },
+  col: {
+    flexGrow: 999,
+  },
+  colAuto: {
+
+  },
+  stockError: {
+    color:'red',
+  },
+});
 
 export default Especificacion;
