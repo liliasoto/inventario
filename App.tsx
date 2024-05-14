@@ -8,13 +8,15 @@ import ProductDetails, {Params as ProductDetailsParams} from './app/screens/Prod
 import ProductAdd from './app/screens/PoductAdd';
 import { Button } from 'react-native';
 
-const Stack = createStackNavigator();
-
 export type RootStackParamList = {
+  Login: undefined;
   Home: undefined;
   ProductDetails: ProductDetailsParams;
   ProductAdd: undefined;
 }
+
+export type StackNavigation = NavigationProp<RootStackParamList>;
+const Stack = createStackNavigator<RootStackParamList>();
 
 function HomeHeader(): React.JSX.Element {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
