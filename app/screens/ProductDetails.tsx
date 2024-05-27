@@ -9,7 +9,6 @@ import { Movimiento } from './model/Movimiento.ts';
 
 export type Params = {
   product: Product;
-  movimiento: Movimiento;
 };
 
 export type Props = {
