@@ -1,8 +1,20 @@
 import React, { useState } from "react";
 import { SafeAreaView, View, TextInput, Button, Alert } from "react-native";
 import LocalDB from "../persistance/localdb";
+import { RouteProp } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../../App";
+import WebServiceParams from "./WebServiceParams";
 
-export default function ProductAdd(): React.JSX.Element {
+type ProductAddScreenProps = StackNavigationProp<RootStackParamList,'ProductAdd'>;
+type ProductAddRoute = RouteProp<RootStackParamList, 'ProductAdd'>;
+
+type ProductAddProps = {
+    navigation: ProductAddScreenProps;
+    route: ProductAddRoute;
+};
+
+function ProductAdd({navigation}:ProductAddProps): React.JSX.Element{
     const [nombre, setNombre] = useState("");
     const [precio, setPrecio] = useState("");
     const [minStock, setMinStock] = useState("");
@@ -40,6 +52,27 @@ export default function ProductAdd(): React.JSX.Element {
         }
     };
 
+    const btnGuardarOnPress = async () => {
+        const db = await LocalDB.connect();
+        db.transaction(tx => {
+            tx.executeSql(
+                'INSERT INTO productos (nombre, precio, minStock) VALUES (?, ?, ?)',
+                [nombre, precio, minStock],
+            );
+            navigation.goBack();
+        });
+        const response = await fetch(
+            `http://${WebServiceParams.host}:${WebServiceParams.port}/productos`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({nombre, precio, minStock}),
+            }
+        );
+    };
+
     return (
         <SafeAreaView>
             <View>
@@ -72,8 +105,10 @@ export default function ProductAdd(): React.JSX.Element {
                     onChangeText={setMaxStock}
                     keyboardType="numeric"
                 />
-                <Button title="Agregar" onPress={handleAddProduct} />
+                <Button title="Agregar" onPress={btnGuardarOnPress} />
             </View>
         </SafeAreaView>
     );
 }
+
+export default ProductAdd;
